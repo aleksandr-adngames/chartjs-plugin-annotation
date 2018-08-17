@@ -36,6 +36,61 @@ module.exports = function(Chart) {
 		};
 	}
 
+    function fitToViewPortByX(view, width, padWidth, ret) {
+        if(ret.x - padWidth < 0) {
+            ret.x = padWidth;
+        } else if(ret.x + width > view.clip.x2) {
+            ret.x = view.clip.x2 - width - padWidth;
+        }
+        return ret;
+	}
+
+    function calculateMainLabelPosition(view, width, height, padWidth, padHeight, activeEl, isSubTitleEnabled) {
+        var ret = {x: 0, y: 0};
+
+        console.log('@@@ calculateMainLabelPosition()', JSON.stringify({
+            view:view,
+            width:width,
+            height:height,
+            padWidth:padWidth,
+            padHeight:padHeight
+        } ,null, 2), activeEl);
+
+        ret.x = ((view.x1 + view.x2 - width) / 2);
+        ret.y = ((view.y1 + view.y2 - height) / 2);
+
+        ret = fitToViewPortByX(view, width, padWidth,  ret);
+		if(isSubTitleEnabled){
+			ret.y -= 30;
+		}
+        return ret;
+	}
+
+    function calculateSubLabelPosition(view, width, height, padWidth, padHeight, activeEl, isEnabled) {
+		if(!isEnabled){
+			return {
+				x: -9999,
+				y: -9999
+			};
+		}
+        var ret = {x: 0, y: 0};
+
+        console.log('@@@ calculateSubLabelPosition()', JSON.stringify({
+            view:view,
+			width:width,
+			height:height,
+            padWidth:padWidth,
+            padHeight:padHeight
+		} ,null, 2), activeEl, ret);
+
+        ret.x = ((view.x1 + view.x2 - width) / 2);
+        ret.y = ((view.y1 + view.y2 - height) / 2);
+
+        ret = fitToViewPortByX(view,width, padWidth, ret);
+
+        return ret;
+	}
+
 	function calculateLabelPosition(view, width, height, padWidth, padHeight) {
 		var line = view.line;
 		var ret = {};
@@ -97,11 +152,16 @@ module.exports = function(Chart) {
 			};
 		},
 		configure: function() {
+			console.log('***', 'configure()');
 			var model = this._model;
-			var options = this.options;
+            var options = this.options;
 			var chartInstance = this.chartInstance;
 			var ctx = chartInstance.chart.ctx;
-
+            var index = chartInstance.chart.annotation._index;
+            var activeElement = this.chartInstance.chart.config.data.datasets[0].data[index];
+            if(activeElement){
+                options.value = activeElement.x;
+            }
 			var scale = chartInstance.scales[options.scaleID];
 			var pixel, endPixel;
 			if (scale) {
@@ -138,25 +198,61 @@ module.exports = function(Chart) {
 			model.line = new LineFunction(model);
 			model.mode = options.mode;
 
+            // Figure out the subLabel:
+            var subLabelEnabled = options.subLabel.callbacks.enabled(index);
+            if(subLabelEnabled || true) {
+            	var subLabelLabel = options.subLabel.callbacks.label(index);
+				var subLabelTitle = options.subLabel.callbacks.title(index);
+				model.subLabelBackgroundColor = options.subLabel.backgroundColor;
+				model.subLabelFontFamily = options.subLabel.fontFamily;
+				model.subLabelFontSize = options.subLabel.fontSize;
+				model.subLabelFontStyle = options.subLabel.fontStyle;
+				model.subLabelFontColor = options.subLabel.color;
+				model.subLabelXPadding = options.subLabel.xPadding;
+				model.subLabelYPadding = options.subLabel.yPadding;
+				model.subLabelCornerRadius = options.subLabel.cornerRadius;
+				model.subLabelPosition = options.subLabel.position;
+				model.subLabelXAdjust = options.subLabel.xAdjust;
+				model.subLabelYAdjust = options.subLabel.yAdjust;
+				model.subLabelEnabled = subLabelEnabled;
+				model.sublLabelLabel = subLabelLabel;
+				model.sublLabelTitle = subLabelTitle;
+
+				ctx.subLabelFont = chartHelpers.fontString(model.subLabelFontSize, model.subLabelFontStyle, model.subLabelFontFamily);
+				var subLabelTextWidth = ctx.measureText(model.sublLabelTitle).width + 15;
+				var subLabelTextHeight = ctx.measureText('M').width;
+				var subLabelPosition = calculateSubLabelPosition(
+					model,
+					subLabelTextWidth,
+					subLabelTextHeight,
+					model.subLabelXPadding,
+					model.subLabelYPadding,
+					this.chartInstance.chart.active ? this.chartInstance.chart.active[0] : null,
+                    subLabelEnabled
+				);
+				model.subLabelX = subLabelPosition.x - model.subLabelXPadding;
+				model.subLabelY = subLabelPosition.y - model.subLabelYPadding;
+				model.subLabelWidth = subLabelTextWidth + (2 * model.subLabelXPadding);
+				model.subLabelHeight = subLabelTextHeight + (2 * model.subLabelYPadding);
+            }
+
 			// Figure out the label:
 			model.labelBackgroundColor = options.label.backgroundColor;
 			model.labelFontFamily = options.label.fontFamily;
 			model.labelFontSize = options.label.fontSize;
 			model.labelFontStyle = options.label.fontStyle;
-			model.labelFontColor = options.label.fontColor;
+			model.labelFontColor = options.label.color;
 			model.labelXPadding = options.label.xPadding;
 			model.labelYPadding = options.label.yPadding;
 			model.labelCornerRadius = options.label.cornerRadius;
 			model.labelPosition = options.label.position;
-			model.labelXAdjust = options.label.xAdjust;
-			model.labelYAdjust = options.label.yAdjust;
-			model.labelEnabled = options.label.enabled;
-			model.labelContent = options.label.content;
+			model.labelEnabled = options.label.callbacks.enabled(index);
+			model.labelContent = options.label.callbacks.content(index);
 
 			ctx.font = chartHelpers.fontString(model.labelFontSize, model.labelFontStyle, model.labelFontFamily);
 			var textWidth = ctx.measureText(model.labelContent).width;
 			var textHeight = ctx.measureText('M').width;
-			var labelPosition = calculateLabelPosition(model, textWidth, textHeight, model.labelXPadding, model.labelYPadding);
+			var labelPosition = calculateMainLabelPosition(model, textWidth, textHeight, model.labelXPadding, model.labelYPadding, null, subLabelEnabled);
 			model.labelX = labelPosition.x - model.labelXPadding;
 			model.labelY = labelPosition.y - model.labelYPadding;
 			model.labelWidth = textWidth + (2 * model.labelXPadding);
@@ -200,6 +296,7 @@ module.exports = function(Chart) {
 			return Math.sqrt(Math.pow(this.getWidth(), 2) + Math.pow(this.getHeight(), 2));
 		},
 		draw: function() {
+            console.log('***', 'draw()', this._view);
 			var view = this._view;
 			var ctx = this.chartInstance.chart.ctx;
 
@@ -222,13 +319,15 @@ module.exports = function(Chart) {
 			}
 			ctx.lineDashOffset = view.borderDashOffset;
 
-			// Draw
-			ctx.beginPath();
-			ctx.moveTo(view.x1, view.y1);
-			ctx.lineTo(view.x2, view.y2);
-			ctx.stroke();
 
 			if (view.labelEnabled && view.labelContent) {
+
+                // Draw
+                ctx.beginPath();
+                ctx.moveTo(view.x1, view.y1);
+                ctx.lineTo(view.x2, view.y2);
+                ctx.stroke();
+
 				ctx.beginPath();
 				ctx.rect(view.clip.x1, view.clip.y1, view.clip.x2 - view.clip.x1, view.clip.y2 - view.clip.y1);
 				ctx.clip();
@@ -258,6 +357,40 @@ module.exports = function(Chart) {
 					view.labelContent,
 					view.labelX + (view.labelWidth / 2),
 					view.labelY + (view.labelHeight / 2)
+				);
+			}
+
+			//Draw SUBLABEL
+			if (view.subLabelEnabled || true) {
+				ctx.beginPath();
+				ctx.rect(view.clip.x1, view.clip.y1, view.clip.x2 - view.clip.x1, view.clip.y2 - view.clip.y1);
+				ctx.clip();
+
+				ctx.fillStyle = view.subLabelBackgroundColor;
+				// Draw the tooltip
+				chartHelpers.drawRoundedRectangle(
+					ctx,
+					view.subLabelX, // x
+					view.subLabelY, // y
+					view.subLabelWidth, // width
+					view.subLabelHeight, // height
+					view.subLabelCornerRadius // radius
+				);
+				ctx.fill();
+
+				// Draw the text
+				ctx.font = chartHelpers.fontString(
+					view.subLabelFontSize,
+					view.subLabelFontStyle,
+					view.subLabelFontFamily
+				);
+				ctx.fillStyle = view.subLabelFontColor;
+				ctx.textAlign = 'center';
+				ctx.textBaseline = 'middle';
+				ctx.fillText(
+					view.sublLabelTitle,
+					view.subLabelX + (view.subLabelWidth / 2),
+					view.subLabelY + (view.subLabelHeight / 2)
 				);
 			}
 

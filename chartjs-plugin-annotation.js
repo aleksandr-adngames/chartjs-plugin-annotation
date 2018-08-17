@@ -7,7 +7,7 @@
  * Released under the MIT license
  * https://github.com/chartjs/Chart.Annotation.js/blob/master/LICENSE.md
  */
-(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 
 },{}],2:[function(require,module,exports){
 module.exports = function(Chart) {
@@ -20,7 +20,9 @@ module.exports = function(Chart) {
 
 	function setAfterDataLimitsHook(axisOptions) {
 		helpers.decorate(axisOptions, 'afterDataLimits', function(previous, scale) {
-			if (previous) previous(scale);
+			if (previous) {
+				previous(scale);
+			}
 			helpers.adjustScaleRange(scale);
 		});
 	}
@@ -78,7 +80,7 @@ module.exports = function(Chart) {
 			// Add new elements, or update existing ones
 			ns.options.annotations.forEach(function(annotation) {
 				var id = annotation.id || helpers.objectId();
-				
+
 				// No element with that ID exists, and it's a valid annotation type
 				if (!ns.elements[id] && annotationTypes[annotation.type]) {
 					var cls = annotationTypes[annotation.type];
@@ -140,7 +142,7 @@ module.exports = function(Chart) {
 },{"./events.js":4,"./helpers.js":5}],3:[function(require,module,exports){
 module.exports = function(Chart) {
 	var chartHelpers = Chart.helpers;
-	
+
 	var AnnotationElement = Chart.Element.extend({
 		initialize: function() {
 			this.hidden = false;
@@ -171,15 +173,15 @@ module.exports = function(Chart) {
 		var hover = false;
 		var filteredEvents = events.filter(function(eventName) {
 			switch (eventName) {
-				case 'mouseenter':
-				case 'mouseover':
-				case 'mouseout':
-				case 'mouseleave':
-					hover = true;
-					return false;
+			case 'mouseenter':
+			case 'mouseover':
+			case 'mouseout':
+			case 'mouseleave':
+				hover = true;
+				return false;
 
-				default:
-					return true;
+			default:
+				return true;
 			}
 		});
 		if (hover && filteredEvents.indexOf('mousemove') === -1) {
@@ -204,24 +206,24 @@ module.exports = function(Chart) {
 			if (element && !element.hovering) {
 				// hover started
 				['mouseenter', 'mouseover'].forEach(function(eventName) {
-					var eventHandlerName = helpers.getEventHandlerName(eventName);
+					var handlerName = helpers.getEventHandlerName(eventName);
 					var hoverEvent = helpers.createMouseEvent(eventName, e); // recreate the event to match the handler
 					element.hovering = true;
-					if (typeof options[eventHandlerName] === 'function') {
-						eventHandlers.push([ options[eventHandlerName], hoverEvent, element ]);
+					if (typeof options[handlerName] === 'function') {
+						eventHandlers.push([options[handlerName], hoverEvent, element]);
 					}
 				});
 			} else if (!element) {
 				// hover ended
-				elements.forEach(function(element) {
-					if (element.hovering) {
-						element.hovering = false;
-						var options = element.options;
+				elements.forEach(function(el) {
+					if (el.hovering) {
+						el.hovering = false;
+						var opt = el.options;
 						['mouseout', 'mouseleave'].forEach(function(eventName) {
-							var eventHandlerName = helpers.getEventHandlerName(eventName);
+							var handlerName = helpers.getEventHandlerName(eventName);
 							var hoverEvent = helpers.createMouseEvent(eventName, e); // recreate the event to match the handler
-							if (typeof options[eventHandlerName] === 'function') {
-								eventHandlers.push([ options[eventHandlerName], hoverEvent, element ]);
+							if (typeof opt[handlerName] === 'function') {
+								eventHandlers.push([opt[handlerName], hoverEvent, el]);
 							}
 						});
 					}
@@ -234,7 +236,7 @@ module.exports = function(Chart) {
 		//
 		// 1: wait dblClickSpeed ms, then fire click
 		// 2: cancel (1) if it is waiting then wait dblClickSpeed ms then fire click, else fire click immediately
-		// 3: cancel (1) or (2) if waiting, then fire dblclick 
+		// 3: cancel (1) or (2) if waiting, then fire dblclick
 		if (element && events.indexOf('dblclick') > -1 && typeof options.onDblclick === 'function') {
 			if (e.type === 'click' && typeof options.onClick === 'function') {
 				clearTimeout(element.clickTimeout);
@@ -253,7 +255,7 @@ module.exports = function(Chart) {
 
 		// Dispatch the event to the usual handler, but only if we haven't substituted it
 		if (element && typeof options[eventHandlerName] === 'function' && eventHandlers.length === 0) {
-			eventHandlers.push([ options[eventHandlerName], e, element ]);
+			eventHandlers.push([options[eventHandlerName], e, element]);
 		}
 
 		if (eventHandlers.length > 0) {
@@ -277,9 +279,9 @@ function noop() {}
 
 function elements(chartInstance) {
 	// Turn the elements object into an array of elements
-	var elements = chartInstance.annotation.elements;
-	return Object.keys(elements).map(function(id) {
-		return elements[id];
+	var els = chartInstance.annotation.elements;
+	return Object.keys(els).map(function(id) {
+		return els[id];
 	});
 }
 
@@ -292,9 +294,8 @@ function isValid(rawValue) {
 		return false;
 	} else if (typeof rawValue === 'number') {
 		return isFinite(rawValue);
-	} else {
-		return !!rawValue;
 	}
+	return !!rawValue;
 }
 
 function decorate(obj, prop, func) {
@@ -303,12 +304,12 @@ function decorate(obj, prop, func) {
 		if (obj[prop]) {
 			obj[prefix + prop] = obj[prop].bind(obj);
 			obj[prop] = function() {
-				var args = [ obj[prefix + prop] ].concat(Array.prototype.slice.call(arguments));
+				var args = [obj[prefix + prop]].concat(Array.prototype.slice.call(arguments));
 				return func.apply(obj, args);
 			};
 		} else {
 			obj[prop] = function() {
-				var args = [ undefined ].concat(Array.prototype.slice.call(arguments));
+				var args = [undefined].concat(Array.prototype.slice.call(arguments));
 				return func.apply(obj, args);
 			};
 		}
@@ -369,6 +370,7 @@ module.exports = function(Chart) {
 		if (chartHelpers.isArray(config.annotations)) {
 			config.annotations.forEach(function(annotation) {
 				annotation.label = chartHelpers.configMerge(Chart.Annotation.labelDefaults, annotation.label);
+				annotation.subLabel = chartHelpers.configMerge(Chart.Annotation.subLabelDefaults, annotation.subLabel);
 			});
 		}
 		return config;
@@ -437,7 +439,8 @@ module.exports = function(Chart) {
 			.sort(function(a, b) {
 				// If there are multiple elements equally close,
 				// sort them by size, then by index
-				var sizeA = a.getArea(), sizeB = b.getArea();
+				var sizeA = a.getArea();
+				var sizeB = b.getArea();
 				return (sizeA > sizeB || sizeA < sizeB) ? sizeA - sizeB : a._index - b._index;
 			})
 			.slice(0, 1)[0]; // return only the top item
@@ -462,7 +465,7 @@ module.exports = function(Chart) {
 },{}],6:[function(require,module,exports){
 // Get the chart variable
 var Chart = require('chart.js');
-Chart = typeof(Chart) === 'function' ? Chart : window.Chart;
+Chart = typeof Chart === 'function' ? Chart : window.Chart;
 
 // Configure plugin namespace
 Chart.Annotation = Chart.Annotation || {};
@@ -495,6 +498,21 @@ Chart.Annotation.labelDefaults = {
 	enabled: false,
 	content: null
 };
+Chart.Annotation.subLabelDefaults = {
+	backgroundColor: 'rgba(0,0,0,0.8)',
+	fontFamily: Chart.defaults.global.defaultFontFamily,
+	fontSize: Chart.defaults.global.defaultFontSize,
+	fontStyle: 'bold',
+	fontColor: 'red',
+	xPadding: 6,
+	yPadding: 6,
+	cornerRadius: 6,
+	position: 'center',
+	xAdjust: 0,
+	yAdjust: 0,
+	enabled: false,
+	content: null
+};
 
 Chart.Annotation.Element = require('./element.js')(Chart);
 
@@ -512,7 +530,7 @@ Chart.pluginService.register(annotationPlugin);
 // Box Annotation implementation
 module.exports = function(Chart) {
 	var helpers = require('../helpers.js')(Chart);
-	
+
 	var BoxAnnotation = Chart.Annotation.Element.extend({
 		setDataLimits: function() {
 			var model = this._model;
@@ -525,14 +543,14 @@ module.exports = function(Chart) {
 
 			// Set the data range for this annotation
 			model.ranges = {};
-			
+
 			if (!chartArea) {
 				return;
 			}
-			
+
 			var min = 0;
 			var max = 0;
-			
+
 			if (xScale) {
 				min = helpers.isValid(options.xMin) ? options.xMin : xScale.getPixelForValue(chartArea.left);
 				max = helpers.isValid(options.xMax) ? options.xMax : xScale.getPixelForValue(chartArea.right);
@@ -570,10 +588,10 @@ module.exports = function(Chart) {
 				y2: chartArea.bottom
 			};
 
-			var left = chartArea.left, 
-				top = chartArea.top, 
-				right = chartArea.right, 
-				bottom = chartArea.bottom;
+			var left = chartArea.left;
+			var top = chartArea.top;
+			var right = chartArea.right;
+			var bottom = chartArea.bottom;
 
 			var min, max;
 
@@ -605,9 +623,9 @@ module.exports = function(Chart) {
 		inRange: function(mouseX, mouseY) {
 			var model = this._model;
 			return model &&
-				mouseX >= model.left && 
-				mouseX <= model.right && 
-				mouseY >= model.top && 
+				mouseX >= model.left &&
+				mouseX <= model.right &&
+				mouseY >= model.top &&
 				mouseY <= model.bottom;
 		},
 		getCenterPoint: function() {
@@ -644,8 +662,8 @@ module.exports = function(Chart) {
 			ctx.fillStyle = view.backgroundColor;
 
 			// Draw
-			var width = view.right - view.left,
-				height = view.bottom - view.top;
+			var width = view.right - view.left;
+			var height = view.bottom - view.top;
 			ctx.fillRect(view.left, view.top, width, height);
 			ctx.strokeRect(view.left, view.top, width, height);
 
@@ -665,6 +683,139 @@ module.exports = function(Chart) {
 	var horizontalKeyword = 'horizontal';
 	var verticalKeyword = 'vertical';
 
+	function LineFunction(view) {
+		// Describe the line in slope-intercept form (y = mx + b).
+		// Note that the axes are rotated 90° CCW, which causes the
+		// x- and y-axes to be swapped.
+		var m = (view.x2 - view.x1) / (view.y2 - view.y1);
+		var b = view.x1 || 0;
+
+		this.m = m;
+		this.b = b;
+
+		this.getX = function(y) {
+			// Coordinates are relative to the origin of the canvas
+			return m * (y - view.y1) + b;
+		};
+
+		this.getY = function(x) {
+			return ((x - b) / m) + view.y1;
+		};
+
+		this.intersects = function(x, y, epsilon) {
+			epsilon = epsilon || 0.001;
+			var dy = this.getY(x);
+			var dx = this.getX(y);
+			return (
+				(!isFinite(dy) || Math.abs(y - dy) < epsilon) &&
+				(!isFinite(dx) || Math.abs(x - dx) < epsilon)
+			);
+		};
+	}
+
+    function fitToViewPortByX(view, width, padWidth, ret) {
+        if(ret.x - padWidth < 0) {
+            ret.x = padWidth;
+        } else if(ret.x + width > view.clip.x2) {
+            ret.x = view.clip.x2 - width - padWidth;
+        }
+        return ret;
+	}
+
+    function calculateMainLabelPosition(view, width, height, padWidth, padHeight, activeEl, isSubTitleEnabled) {
+        var ret = {x: 0, y: 0};
+
+        console.log('@@@ calculateMainLabelPosition()', JSON.stringify({
+            view:view,
+            width:width,
+            height:height,
+            padWidth:padWidth,
+            padHeight:padHeight
+        } ,null, 2), activeEl);
+
+        ret.x = ((view.x1 + view.x2 - width) / 2);
+        ret.y = ((view.y1 + view.y2 - height) / 2);
+
+        ret = fitToViewPortByX(view, width, padWidth,  ret);
+		if(isSubTitleEnabled){
+			ret.y -= 30;
+		}
+        return ret;
+	}
+
+    function calculateSubLabelPosition(view, width, height, padWidth, padHeight, activeEl, isEnabled) {
+		if(!isEnabled){
+			return {
+				x: -9999,
+				y: -9999
+			};
+		}
+        var ret = {x: 0, y: 0};
+
+        console.log('@@@ calculateSubLabelPosition()', JSON.stringify({
+            view:view,
+			width:width,
+			height:height,
+            padWidth:padWidth,
+            padHeight:padHeight
+		} ,null, 2), activeEl, ret);
+
+        ret.x = ((view.x1 + view.x2 - width) / 2);
+        ret.y = ((view.y1 + view.y2 - height) / 2);
+
+        ret = fitToViewPortByX(view,width, padWidth, ret);
+
+        return ret;
+	}
+
+	function calculateLabelPosition(view, width, height, padWidth, padHeight) {
+		var line = view.line;
+		var ret = {};
+		var xa = 0;
+		var ya = 0;
+
+		switch (true) {
+		// top align
+		case view.mode === verticalKeyword && view.labelPosition === 'top':
+			ya = padHeight + view.labelYAdjust;
+			xa = (width / 2) + view.labelXAdjust;
+			ret.y = view.y1 + ya;
+			ret.x = (isFinite(line.m) ? line.getX(ret.y) : view.x1) - xa;
+			break;
+
+		// bottom align
+		case view.mode === verticalKeyword && view.labelPosition === 'bottom':
+			ya = height + padHeight + view.labelYAdjust;
+			xa = (width / 2) + view.labelXAdjust;
+			ret.y = view.y2 - ya;
+			ret.x = (isFinite(line.m) ? line.getX(ret.y) : view.x1) - xa;
+			break;
+
+		// left align
+		case view.mode === horizontalKeyword && view.labelPosition === 'left':
+			xa = padWidth + view.labelXAdjust;
+			ya = -(height / 2) + view.labelYAdjust;
+			ret.x = view.x1 + xa;
+			ret.y = line.getY(ret.x) + ya;
+			break;
+
+		// right align
+		case view.mode === horizontalKeyword && view.labelPosition === 'right':
+			xa = width + padWidth + view.labelXAdjust;
+			ya = -(height / 2) + view.labelYAdjust;
+			ret.x = view.x2 - xa;
+			ret.y = line.getY(ret.x) + ya;
+			break;
+
+		// center align
+		default:
+			ret.x = ((view.x1 + view.x2 - width) / 2) + view.labelXAdjust;
+			ret.y = ((view.y1 + view.y2 - height) / 2) + view.labelYAdjust;
+		}
+
+		return ret;
+	}
+
 	var LineAnnotation = Chart.Annotation.Element.extend({
 		setDataLimits: function() {
 			var model = this._model;
@@ -678,11 +829,16 @@ module.exports = function(Chart) {
 			};
 		},
 		configure: function() {
+			console.log('***', 'configure()');
 			var model = this._model;
-			var options = this.options;
+            var options = this.options;
 			var chartInstance = this.chartInstance;
 			var ctx = chartInstance.chart.ctx;
-
+            var index = chartInstance.chart.annotation._index;
+            var activeElement = this.chartInstance.chart.config.data.datasets[0].data[index];
+            if(activeElement){
+                options.value = activeElement.x;
+            }
 			var scale = chartInstance.scales[options.scaleID];
 			var pixel, endPixel;
 			if (scale) {
@@ -704,7 +860,7 @@ module.exports = function(Chart) {
 				y2: chartArea.bottom
 			};
 
-			if (this.options.mode == horizontalKeyword) {
+			if (this.options.mode === horizontalKeyword) {
 				model.x1 = chartArea.left;
 				model.x2 = chartArea.right;
 				model.y1 = pixel;
@@ -719,25 +875,61 @@ module.exports = function(Chart) {
 			model.line = new LineFunction(model);
 			model.mode = options.mode;
 
+            // Figure out the subLabel:
+            var subLabelEnabled = options.subLabel.callbacks.enabled(index);
+            if(subLabelEnabled || true) {
+            	var subLabelLabel = options.subLabel.callbacks.label(index);
+				var subLabelTitle = options.subLabel.callbacks.title(index);
+				model.subLabelBackgroundColor = options.subLabel.backgroundColor;
+				model.subLabelFontFamily = options.subLabel.fontFamily;
+				model.subLabelFontSize = options.subLabel.fontSize;
+				model.subLabelFontStyle = options.subLabel.fontStyle;
+				model.subLabelFontColor = options.subLabel.color;
+				model.subLabelXPadding = options.subLabel.xPadding;
+				model.subLabelYPadding = options.subLabel.yPadding;
+				model.subLabelCornerRadius = options.subLabel.cornerRadius;
+				model.subLabelPosition = options.subLabel.position;
+				model.subLabelXAdjust = options.subLabel.xAdjust;
+				model.subLabelYAdjust = options.subLabel.yAdjust;
+				model.subLabelEnabled = subLabelEnabled;
+				model.sublLabelLabel = subLabelLabel;
+				model.sublLabelTitle = subLabelTitle;
+
+				ctx.subLabelFont = chartHelpers.fontString(model.subLabelFontSize, model.subLabelFontStyle, model.subLabelFontFamily);
+				var subLabelTextWidth = ctx.measureText(model.sublLabelTitle).width + 15;
+				var subLabelTextHeight = ctx.measureText('M').width;
+				var subLabelPosition = calculateSubLabelPosition(
+					model,
+					subLabelTextWidth,
+					subLabelTextHeight,
+					model.subLabelXPadding,
+					model.subLabelYPadding,
+					this.chartInstance.chart.active ? this.chartInstance.chart.active[0] : null,
+                    subLabelEnabled
+				);
+				model.subLabelX = subLabelPosition.x - model.subLabelXPadding;
+				model.subLabelY = subLabelPosition.y - model.subLabelYPadding;
+				model.subLabelWidth = subLabelTextWidth + (2 * model.subLabelXPadding);
+				model.subLabelHeight = subLabelTextHeight + (2 * model.subLabelYPadding);
+            }
+
 			// Figure out the label:
 			model.labelBackgroundColor = options.label.backgroundColor;
 			model.labelFontFamily = options.label.fontFamily;
 			model.labelFontSize = options.label.fontSize;
 			model.labelFontStyle = options.label.fontStyle;
-			model.labelFontColor = options.label.fontColor;
+			model.labelFontColor = options.label.color;
 			model.labelXPadding = options.label.xPadding;
 			model.labelYPadding = options.label.yPadding;
 			model.labelCornerRadius = options.label.cornerRadius;
 			model.labelPosition = options.label.position;
-			model.labelXAdjust = options.label.xAdjust;
-			model.labelYAdjust = options.label.yAdjust;
-			model.labelEnabled = options.label.enabled;
-			model.labelContent = options.label.content;
+			model.labelEnabled = options.label.callbacks.enabled(index);
+			model.labelContent = options.label.callbacks.content(index);
 
 			ctx.font = chartHelpers.fontString(model.labelFontSize, model.labelFontStyle, model.labelFontFamily);
 			var textWidth = ctx.measureText(model.labelContent).width;
 			var textHeight = ctx.measureText('M').width;
-			var labelPosition = calculateLabelPosition(model, textWidth, textHeight, model.labelXPadding, model.labelYPadding);
+			var labelPosition = calculateMainLabelPosition(model, textWidth, textHeight, model.labelXPadding, model.labelYPadding, null, subLabelEnabled);
 			model.labelX = labelPosition.x - model.labelXPadding;
 			model.labelY = labelPosition.y - model.labelYPadding;
 			model.labelWidth = textWidth + (2 * model.labelXPadding);
@@ -750,7 +942,7 @@ module.exports = function(Chart) {
 		},
 		inRange: function(mouseX, mouseY) {
 			var model = this._model;
-			
+
 			return (
 				// On the line
 				model.line &&
@@ -759,9 +951,9 @@ module.exports = function(Chart) {
 				// On the label
 				model.labelEnabled &&
 				model.labelContent &&
-				mouseX >= model.labelX && 
-				mouseX <= model.labelX + model.labelWidth && 
-				mouseY >= model.labelY && 
+				mouseX >= model.labelX &&
+				mouseX <= model.labelX + model.labelWidth &&
+				mouseY >= model.labelY &&
 				mouseY <= model.labelY + model.labelHeight
 			);
 		},
@@ -781,6 +973,7 @@ module.exports = function(Chart) {
 			return Math.sqrt(Math.pow(this.getWidth(), 2) + Math.pow(this.getHeight(), 2));
 		},
 		draw: function() {
+            console.log('***', 'draw()', this._view);
 			var view = this._view;
 			var ctx = this.chartInstance.chart.ctx;
 
@@ -803,13 +996,15 @@ module.exports = function(Chart) {
 			}
 			ctx.lineDashOffset = view.borderDashOffset;
 
-			// Draw
-			ctx.beginPath();
-			ctx.moveTo(view.x1, view.y1);
-			ctx.lineTo(view.x2, view.y2);
-			ctx.stroke();
 
 			if (view.labelEnabled && view.labelContent) {
+
+                // Draw
+                ctx.beginPath();
+                ctx.moveTo(view.x1, view.y1);
+                ctx.lineTo(view.x2, view.y2);
+                ctx.stroke();
+
 				ctx.beginPath();
 				ctx.rect(view.clip.x1, view.clip.y1, view.clip.x2 - view.clip.x1, view.clip.y2 - view.clip.y1);
 				ctx.clip();
@@ -842,85 +1037,43 @@ module.exports = function(Chart) {
 				);
 			}
 
+			//Draw SUBLABEL
+			if (view.subLabelEnabled || true) {
+				ctx.beginPath();
+				ctx.rect(view.clip.x1, view.clip.y1, view.clip.x2 - view.clip.x1, view.clip.y2 - view.clip.y1);
+				ctx.clip();
+
+				ctx.fillStyle = view.subLabelBackgroundColor;
+				// Draw the tooltip
+				chartHelpers.drawRoundedRectangle(
+					ctx,
+					view.subLabelX, // x
+					view.subLabelY, // y
+					view.subLabelWidth, // width
+					view.subLabelHeight, // height
+					view.subLabelCornerRadius // radius
+				);
+				ctx.fill();
+
+				// Draw the text
+				ctx.font = chartHelpers.fontString(
+					view.subLabelFontSize,
+					view.subLabelFontStyle,
+					view.subLabelFontFamily
+				);
+				ctx.fillStyle = view.subLabelFontColor;
+				ctx.textAlign = 'center';
+				ctx.textBaseline = 'middle';
+				ctx.fillText(
+					view.sublLabelTitle,
+					view.subLabelX + (view.subLabelWidth / 2),
+					view.subLabelY + (view.subLabelHeight / 2)
+				);
+			}
+
 			ctx.restore();
 		}
 	});
-
-	function LineFunction(view) {
-		// Describe the line in slope-intercept form (y = mx + b).
-		// Note that the axes are rotated 90° CCW, which causes the
-		// x- and y-axes to be swapped.
-		var m = (view.x2 - view.x1) / (view.y2 - view.y1);
-		var b = view.x1 || 0;
-
-		this.m = m;
-		this.b = b;
-
-		this.getX = function(y) {
-			// Coordinates are relative to the origin of the canvas
-			return m * (y - view.y1) + b;
-		};
-
-		this.getY = function(x) {
-			return ((x - b) / m) + view.y1;
-		};
-
-		this.intersects = function(x, y, epsilon) {
-			epsilon = epsilon || 0.001;
-			var dy = this.getY(x),
-				dx = this.getX(y);
-			return (
-				(!isFinite(dy) || Math.abs(y - dy) < epsilon) &&
-				(!isFinite(dx) || Math.abs(x - dx) < epsilon)
-			);
-		};
-	}
-
-	function calculateLabelPosition(view, width, height, padWidth, padHeight) {
-		var line = view.line;
-		var ret = {}, xa = 0, ya = 0;
-
-		switch (true) {
-			// top align
-			case view.mode == verticalKeyword && view.labelPosition == "top":
-				ya = padHeight + view.labelYAdjust;
-				xa = (width / 2) + view.labelXAdjust;
-				ret.y = view.y1 + ya;
-				ret.x = (isFinite(line.m) ? line.getX(ret.y) : view.x1) - xa;
-			break;
-
-			// bottom align
-			case view.mode == verticalKeyword && view.labelPosition == "bottom":
-				ya = height + padHeight + view.labelYAdjust;
-				xa = (width / 2) + view.labelXAdjust;
-				ret.y = view.y2 - ya;
-				ret.x = (isFinite(line.m) ? line.getX(ret.y) : view.x1) - xa;
-			break;
-
-			// left align
-			case view.mode == horizontalKeyword && view.labelPosition == "left":
-				xa = padWidth + view.labelXAdjust;
-				ya = -(height / 2) + view.labelYAdjust;
-				ret.x = view.x1 + xa;
-				ret.y = line.getY(ret.x) + ya;
-			break;
-
-			// right align
-			case view.mode == horizontalKeyword && view.labelPosition == "right":
-				xa = width + padWidth + view.labelXAdjust;
-				ya = -(height / 2) + view.labelYAdjust;
-				ret.x = view.x2 - xa;
-				ret.y = line.getY(ret.x) + ya;
-			break;
-
-			// center align
-			default:
-				ret.x = ((view.x1 + view.x2 - width) / 2) + view.labelXAdjust;
-				ret.y = ((view.y1 + view.y2 - height) / 2) + view.labelYAdjust;
-		}
-
-		return ret;
-	}
 
 	return LineAnnotation;
 };

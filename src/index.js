@@ -33,6 +33,21 @@ Chart.Annotation.labelDefaults = {
 	enabled: false,
 	content: null
 };
+Chart.Annotation.subLabelDefaults = {
+	backgroundColor: 'rgba(0,0,0,0.8)',
+	fontFamily: Chart.defaults.global.defaultFontFamily,
+	fontSize: Chart.defaults.global.defaultFontSize,
+	fontStyle: 'bold',
+	fontColor: 'red',
+	xPadding: 6,
+	yPadding: 6,
+	cornerRadius: 6,
+	position: 'center',
+	xAdjust: 0,
+	yAdjust: 0,
+	enabled: false,
+	content: null
+};
 
 Chart.Annotation.Element = require('./element.js')(Chart);
 

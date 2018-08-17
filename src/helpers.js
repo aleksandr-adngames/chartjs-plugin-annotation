@@ -93,6 +93,7 @@ module.exports = function(Chart) {
 		if (chartHelpers.isArray(config.annotations)) {
 			config.annotations.forEach(function(annotation) {
 				annotation.label = chartHelpers.configMerge(Chart.Annotation.labelDefaults, annotation.label);
+				annotation.subLabel = chartHelpers.configMerge(Chart.Annotation.subLabelDefaults, annotation.subLabel);
 			});
 		}
 		return config;
