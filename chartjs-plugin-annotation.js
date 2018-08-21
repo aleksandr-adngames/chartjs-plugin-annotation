@@ -829,7 +829,7 @@ module.exports = function(Chart) {
 			};
 		},
 		configure: function() {
-			console.log('***', 'configure()');
+			//console.log('***', 'configure()');
 			var model = this._model;
             var options = this.options;
 			var chartInstance = this.chartInstance;
@@ -981,7 +981,7 @@ module.exports = function(Chart) {
 			return Math.sqrt(Math.pow(this.getWidth(), 2) + Math.pow(this.getHeight(), 2));
 		},
 		draw: function() {
-            console.log('***', 'draw()', this._view);
+           // console.log('***', 'draw()', this._view);
 			var view = this._view;
 			var ctx = this.chartInstance.chart.ctx;
 
