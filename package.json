@@ -11,7 +11,9 @@
   },
   "scripts": {
     "test": "gulp jshint",
-    "build": "gulp build"
+    "build": "gulp build",
+    "reboot": "npm run build && npm run export && cd ../lambo-shared-components && npm start",
+    "export": "cp chartjs-plugin-annotation.min.js ../lambo-shared-components/node_modules/chartjs-plugin-annotation/chartjs-plugin-annotation.min.js"
   },
   "devDependencies": {
     "browserify": "^13.0.0",

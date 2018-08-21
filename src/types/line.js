@@ -61,7 +61,7 @@ module.exports = function(Chart) {
 
         ret = fitToViewPortByX(view, width, padWidth,  ret);
 		if(isSubTitleEnabled){
-			ret.y -= 30;
+			ret.y -= 40;
 		}
         return ret;
 	}
@@ -208,6 +208,7 @@ module.exports = function(Chart) {
 				model.subLabelFontSize = options.subLabel.fontSize;
 				model.subLabelFontStyle = options.subLabel.fontStyle;
 				model.subLabelFontColor = options.subLabel.color;
+                model.subLabelSecondaryFontColor = 'rgb(0, 0, 0, 0.56)';
 				model.subLabelXPadding = options.subLabel.xPadding;
 				model.subLabelYPadding = options.subLabel.yPadding;
 				model.subLabelCornerRadius = options.subLabel.cornerRadius;
@@ -219,8 +220,14 @@ module.exports = function(Chart) {
 				model.sublLabelTitle = subLabelTitle;
 
 				ctx.subLabelFont = chartHelpers.fontString(model.subLabelFontSize, model.subLabelFontStyle, model.subLabelFontFamily);
-				var subLabelTextWidth = ctx.measureText(model.sublLabelTitle).width + 15;
-				var subLabelTextHeight = ctx.measureText('M').width;
+
+                var subLabelLabelWidth = ctx.measureText(model.sublLabelLabel).width + 15;
+                var subLabelTitleWidth = ctx.measureText(model.sublLabelTitle).width + 15;
+
+                var subLabelTextWidth = Math.max(subLabelLabelWidth, subLabelTitleWidth);
+                model.sublLabelLineHeight = ctx.measureText('M').width;
+				var subLabelTextHeight = model.sublLabelLineHeight * 3.5;
+
 				var subLabelPosition = calculateSubLabelPosition(
 					model,
 					subLabelTextWidth,
@@ -230,6 +237,7 @@ module.exports = function(Chart) {
 					this.chartInstance.chart.active ? this.chartInstance.chart.active[0] : null,
                     subLabelEnabled
 				);
+
 				model.subLabelX = subLabelPosition.x - model.subLabelXPadding;
 				model.subLabelY = subLabelPosition.y - model.subLabelYPadding;
 				model.subLabelWidth = subLabelTextWidth + (2 * model.subLabelXPadding);
@@ -390,7 +398,14 @@ module.exports = function(Chart) {
 				ctx.fillText(
 					view.sublLabelTitle,
 					view.subLabelX + (view.subLabelWidth / 2),
-					view.subLabelY + (view.subLabelHeight / 2)
+					view.subLabelY + (view.subLabelHeight / 2) - view.sublLabelLineHeight * 0.7
+				);
+
+                ctx.fillStyle = view.subLabelSecondaryFontColor;
+				ctx.fillText(
+					view.sublLabelLabel,
+					view.subLabelX + (view.subLabelWidth / 2),
+					view.subLabelY + (view.subLabelHeight / 2) + view.sublLabelLineHeight  * 1.2
 				);
 			}
 
