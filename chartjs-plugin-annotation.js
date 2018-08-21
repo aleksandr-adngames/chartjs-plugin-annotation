@@ -725,13 +725,13 @@ module.exports = function(Chart) {
     function calculateMainLabelPosition(view, width, height, padWidth, padHeight, activeEl, isSubTitleEnabled) {
         var ret = {x: 0, y: 0};
 
-        console.log('@@@ calculateMainLabelPosition()', JSON.stringify({
-            view:view,
-            width:width,
-            height:height,
-            padWidth:padWidth,
-            padHeight:padHeight
-        } ,null, 2), activeEl);
+        // console.log('@@@ calculateMainLabelPosition()', JSON.stringify({
+        //     view:view,
+        //     width:width,
+        //     height:height,
+        //     padWidth:padWidth,
+        //     padHeight:padHeight
+        // } ,null, 2), activeEl);
 
         ret.x = ((view.x1 + view.x2 - width) / 2);
         ret.y = ((view.y1 + view.y2 - height) / 2);
@@ -752,13 +752,13 @@ module.exports = function(Chart) {
 		}
         var ret = {x: 0, y: 0};
 
-        console.log('@@@ calculateSubLabelPosition()', JSON.stringify({
-            view:view,
-			width:width,
-			height:height,
-            padWidth:padWidth,
-            padHeight:padHeight
-		} ,null, 2), activeEl, ret);
+        // console.log('@@@ calculateSubLabelPosition()', JSON.stringify({
+         //    view:view,
+		// 	width:width,
+		// 	height:height,
+         //    padWidth:padWidth,
+         //    padHeight:padHeight
+		// } ,null, 2), activeEl, ret);
 
         ret.x = ((view.x1 + view.x2 - width) / 2);
         ret.y = ((view.y1 + view.y2 - height) / 2);
@@ -981,7 +981,7 @@ module.exports = function(Chart) {
 			return Math.sqrt(Math.pow(this.getWidth(), 2) + Math.pow(this.getHeight(), 2));
 		},
 		draw: function() {
-           // console.log('***', 'draw()', this._view);
+            //console.log('***', 'draw()', this._view);
 			var view = this._view;
 			var ctx = this.chartInstance.chart.ctx;
 
